@@ -400,12 +400,12 @@ function initScenes() {
       x: () => -dist(), ease: 'none',
       scrollTrigger: { trigger: '.guides', start: 'top top', end: () => `+=${dist()}`, pin: true, scrub: 1, invalidateOnRefresh: true },
     });
-    // Play each card's entrance once it peeks in (not scrubbed), so cards near the end of the
-    // track — which never reach mid-screen on wide displays — still finish animating.
-    $$('.guide').forEach((g) => gsap.from(g, {
-      rotate: 6, y: 80, opacity: 0, duration: 0.9, ease: 'expo.out',
-      scrollTrigger: { trigger: g, containerAnimation: tween, start: 'left 100%', toggleActions: 'play none none reverse' },
-    }));
+    // One staggered entrance for all cards as the section arrives, played once. Per-card triggers
+    // tied to the horizontal tween left cards hidden on wide screens (some start already in view).
+    gsap.from('.guide', {
+      rotate: 6, y: 80, opacity: 0, duration: 1, stagger: 0.1, ease: 'expo.out',
+      scrollTrigger: { trigger: '.guides', start: 'top 75%', once: true },
+    });
   });
 
   // Counters
