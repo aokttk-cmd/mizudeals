@@ -25,8 +25,13 @@ npm run preview  # serve the production build
 
 ## Deploy
 
-Pushes to `main` build and deploy to **GitHub Pages** via `.github/workflows/deploy.yml`. Pull requests run the build as a check.
-In the repo, set **Settings → Pages → Source** to **GitHub Actions** once.
+Every push and pull request to `main` runs the build as a check (`.github/workflows/deploy.yml`).
+
+Deploying to **GitHub Pages** is off by default because this repo is private (Pages on private repos needs a paid GitHub plan). To turn it on:
+1. **Settings → Pages → Source** → **GitHub Actions**.
+2. **Settings → Secrets and variables → Actions → Variables** → add `DEPLOY_PAGES` = `true`.
+
+Alternatively, import the repo into Vercel or Netlify (build command `npm run build`, output `dist`) — both support private repos for free.
 
 ## Accessibility
 
