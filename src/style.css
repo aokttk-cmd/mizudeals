@@ -324,10 +324,16 @@ h1, h2, h3 { font-family: var(--display); line-height: 1; margin: 0; letter-spac
 }
 .guide__art { position: absolute; inset: 0; opacity: .9; }
 .guide__art svg { width: 100%; height: 100%; }
+/* Dark scrim under the text so it stays readable on bright yellow/green cards */
+.guide__art::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(5, 11, 46, .88) 0%, rgba(5, 11, 46, .55) 30%, rgba(5, 11, 46, 0) 58%);
+}
 .guide > *:not(.guide__art) { position: relative; }
 .guide__tag { align-self: flex-start; padding: .35em .9em; border-radius: 999px; background: var(--ink); color: var(--h); font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .guide h3 { font-size: 1.75rem; line-height: 1.1; }
-.guide time { display: block; margin-top: 12px; color: var(--muted); font-size: .9rem; }
+.guide h3 { color: #fff; text-shadow: 0 2px 12px rgba(5, 11, 46, .35); }
+.guide time { display: block; margin-top: 12px; color: rgba(255, 255, 255, .78); font-size: .9rem; font-weight: 500; }
 .guide:hover .guide__art svg path { animation: wobble 3s ease-in-out infinite; }
 @keyframes wobble { 50% { transform: translateY(-14px) scaleY(1.08); } }
 @media (max-width: 860px) {

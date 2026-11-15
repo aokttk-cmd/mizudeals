@@ -400,9 +400,11 @@ function initScenes() {
       x: () => -dist(), ease: 'none',
       scrollTrigger: { trigger: '.guides', start: 'top top', end: () => `+=${dist()}`, pin: true, scrub: 1, invalidateOnRefresh: true },
     });
+    // Play each card's entrance once it peeks in (not scrubbed), so cards near the end of the
+    // track — which never reach mid-screen on wide displays — still finish animating.
     $$('.guide').forEach((g) => gsap.from(g, {
-      rotate: 6, y: 80, opacity: 0.3, ease: 'none',
-      scrollTrigger: { trigger: g, containerAnimation: tween, start: 'left 95%', end: 'left 55%', scrub: true },
+      rotate: 6, y: 80, opacity: 0, duration: 0.9, ease: 'expo.out',
+      scrollTrigger: { trigger: g, containerAnimation: tween, start: 'left 100%', toggleActions: 'play none none reverse' },
     }));
   });
 
