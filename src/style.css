@@ -42,9 +42,15 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 em {
   font-style: normal;
   background: var(--grad-sun); -webkit-background-clip: text; background-clip: text; color: transparent;
+  /* background-clip:text only paints inside the box; pad it so swashes (script f, serif f) aren't cut,
+     and cancel the padding with negative margin so layout doesn't shift */
+  padding: 0 .2em .15em; margin: 0 -.2em;
 }
 /* Split-text letters/words are inline-blocks, so each needs its own clipped gradient */
-em span { background: var(--grad-sun); -webkit-background-clip: text; background-clip: text; color: transparent; }
+em span {
+  background: var(--grad-sun); -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding: 0 .12em .1em; margin: 0 -.12em;
+}
 h1, h2, h3 { font-family: var(--display); line-height: 1; margin: 0; letter-spacing: -0.03em; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 ::selection { background: var(--amber); color: var(--ink); }
