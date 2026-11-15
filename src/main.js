@@ -139,7 +139,7 @@ function intro() {
     // The falling blue drop splashes into deep night water, so the logo's blue + rainbow pop
     .to('.loader__drop', { scale: 160, backgroundColor: '#0b1a52', duration: 0.9, ease: 'expo.inOut' })
     .add(() => $('.loader').classList.add('is-night'))
-    .set('.loader__drop', { opacity: 0 })
+    .to('.loader__drop', { opacity: 0, duration: 0.4 })
     .to('.loader__mark', { opacity: 1, duration: 0.2 }, '-=0.2')
     .from('.loader__glow', { scale: 0.3, opacity: 0, duration: 1, ease: 'expo.out' }, '<')
     .from('.loader__mark .mark-drop', { scale: 0, svgOrigin: '110 110', duration: 0.6, ease: 'back.out(2)' }, '<')

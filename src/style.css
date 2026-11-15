@@ -65,17 +65,15 @@ h1, h2, h3 { font-family: var(--display); line-height: 1; margin: 0; letter-spac
   position: absolute; width: 18px; height: 18px; border-radius: 50%;
   background: var(--blue);
 }
-.loader.is-night {
-  background:
-    radial-gradient(circle at 50% 50%, rgba(43, 140, 255, .18) 0%, transparent 45%),
-    radial-gradient(120% 90% at 50% 50%, #0b1a52 0%, #050b2e 70%);
-}
+/* One smooth gradient that starts at the exact colour the splash drop ends on, so there's no seam */
+.loader.is-night { background: radial-gradient(farthest-corner at 50% 50%, #0b1a52 0%, #081440 45%, #050b2e 100%); }
 .loader__mark { position: relative; width: clamp(280px, 60vw, 560px); opacity: 0; }
-.loader__mark svg { position: relative; width: 100%; height: auto; filter: drop-shadow(0 18px 40px rgba(8, 102, 232, .45)); }
+.loader__mark svg { position: relative; width: 100%; height: auto; }
 .loader__glow {
-  position: absolute; inset: 0; margin: auto; width: 70%; aspect-ratio: 1; /* centered without transforms (GSAP owns those) */
-  border-radius: 50%; background: radial-gradient(circle, rgba(46, 197, 245, .35), rgba(138, 43, 226, .15) 45%, transparent 70%);
-  filter: blur(10px);
+  /* Large and very soft so it fades into the background with no visible edge, on any screen shape */
+  position: absolute; inset: -60%; margin: auto; aspect-ratio: 1; /* centered without transforms (GSAP owns those) */
+  border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(43, 140, 255, .22), rgba(43, 140, 255, .08) 45%, rgba(43, 140, 255, 0) 100%);
 }
 
 /* ---------- Cursor ---------- */
