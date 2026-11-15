@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Flip } from 'gsap/Flip';
 import Lenis from 'lenis';
-import { stores, coupons, guides, faqs } from './data.js';
+import { loadContent } from './cms.js';
 import { initWaves } from './waves.js';
 
 gsap.registerPlugin(ScrollTrigger, Flip);
@@ -10,66 +10,84 @@ gsap.registerPlugin(ScrollTrigger, Flip);
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const storeById = Object.fromEntries(stores.map((s) => [s.id, s]));
 const initials = (name) => name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+// Content comes from the CMS, so escape everything placed into HTML.
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const safeColor = (c) => (/^#[0-9a-fA-F]{3,8}$/.test(c || '') ? c : '#2b8cff');
+const safeUrl = (u) => (/^https?:\/\//i.test(u || '') ? u : '');
+
+// Filled by loadContent() during boot
+let allStores = [], stores = [], coupons = [], guides = [], faqs = [], storeById = {};
 
 /* ---------------- Render ---------------- */
 function render() {
   // Marquee (two copies for a seamless loop)
-  const names = stores.map((s) => `<span>${s.name}</span>`).join('');
+  const names = stores.map((s) => `<span>${esc(s.name)}</span>`).join('');
   $('.marquee__track').innerHTML = names + names;
 
   $('.stores').innerHTML = stores.map((s) => `
-    <a href="#coupons" class="store" id="store-${s.id}" data-cat="${s.cat}" style="--c:${s.color}">
-      <div class="store__logo">${initials(s.name)}</div>
-      <h3>${s.name}</h3>
-      <p>${s.coupons}+ coupons · ${s.cat}</p>
+    <a href="#coupons" class="store" id="store-${esc(s.id)}" data-cat="${esc(s.cat)}" style="--c:${safeColor(s.color)}">
+      <div class="store__logo">${s.logo
+        ? `<img src="${esc(s.logo)}?w=120&h=120&fit=max&auto=format" alt="" loading="lazy" />`
+        : esc(initials(s.name))}</div>
+      <h3>${esc(s.name)}</h3>
+      <p>${s.coupons} coupon${s.coupons === 1 ? '' : 's'} · ${esc(s.cat)}</p>
       <span class="store__arrow" aria-hidden="true">→</span>
     </a>`).join('');
 
-  const cats = ['All', ...new Set(coupons.map((c) => c.cat))];
+  const cats = ['All', ...new Set(coupons.map((c) => c.cat).filter(Boolean))];
   $('.chips').innerHTML = cats.map((c, i) =>
-    `<button class="chip${i === 0 ? ' is-active' : ''}" role="tab" aria-selected="${i === 0}" data-cat="${c}">${c}</button>`).join('');
+    `<button class="chip${i === 0 ? ' is-active' : ''}" role="tab" aria-selected="${i === 0}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
 
-  $('.coupons').innerHTML = coupons.map((c, i) => {
+  $('.coupons').innerHTML = coupons.length ? coupons.map((c, i) => {
     const s = storeById[c.store];
     const isCode = c.type === 'code';
     return `
-    <article class="coupon" data-cat="${c.cat}" data-i="${i}" style="--c:${s.color}">
+    <article class="coupon" data-cat="${esc(c.cat)}" data-i="${i}" style="--c:${safeColor(s.color)}">
       <div>
-        <div class="coupon__store"><span class="coupon__dot"></span>${s.name}</div>
-        <h3>${c.title}</h3>
-        <small>Used ${c.used.toLocaleString()} times · Verified</small>
+        <div class="coupon__store"><span class="coupon__dot"></span>${esc(s.name)}</div>
+        <h3>${esc(c.title)}</h3>
+        <small>Used ${Number(c.used || 0).toLocaleString()} times · Verified</small>
       </div>
       <button class="reveal-btn${isCode ? '' : ' reveal-btn--deal'}" data-i="${i}">
-        ${isCode ? `<span class="reveal-btn__code">${c.code.slice(-3)}</span>` : ''}
+        ${isCode ? `<span class="reveal-btn__code">${esc(String(c.code).slice(-3))}</span>` : ''}
         <span class="reveal-btn__face">${isCode ? 'GET CODE' : 'GET DEAL'}</span>
       </button>
     </article>`;
-  }).join('');
+  }).join('') : '<p class="empty-note">New deals are on the way — check back soon.</p>';
 
   $('.guides__track').innerHTML = guides.map((g, i) => `
-    <a href="#guides" class="guide" style="--h:${g.hue}">
-      <div class="guide__art" aria-hidden="true">${blobArt(g.hue, i)}</div>
-      <span class="guide__tag">${g.tag}</span>
-      <div><h3>${g.title}</h3><time>${g.date}</time></div>
+    <a href="#guides" class="guide" style="--h:${safeColor(g.hue)}">
+      <div class="guide__art" aria-hidden="true">${blobArt(safeColor(g.hue), i)}</div>
+      <span class="guide__tag">${esc(g.tag)}</span>
+      <div><h3>${esc(g.title)}</h3><time>${esc(g.date)}</time></div>
     </a>`).join('');
 
   $('.faq').innerHTML = faqs.map((f, i) => `
     <div class="faq__item">
-      <button class="faq__q" aria-expanded="false" aria-controls="faq-${i}">${f.q}<span class="faq__icon" aria-hidden="true"></span></button>
-      <div class="faq__a" id="faq-${i}" role="region"><p>${f.a}</p></div>
+      <button class="faq__q" aria-expanded="false" aria-controls="faq-${i}">${esc(f.q)}<span class="faq__icon" aria-hidden="true"></span></button>
+      <div class="faq__a" id="faq-${i}" role="region"><p>${esc(f.a)}</p></div>
     </div>`).join('');
 
   $('.year').textContent = new Date().getFullYear();
 }
 
-function blobArt(color, seed) {
+// Lighten (amt > 0) or darken (amt < 0) a #rrggbb colour
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1, 7).padEnd(6, '0'), 16);
+  const ch = (v) => Math.round(amt >= 0 ? v + (255 - v) * amt : v * (1 + amt));
+  const [r, g, b] = [n >> 16, (n >> 8) & 255, n & 255].map(ch);
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
+}
+
+function blobArt(color, i) {
+  const seed = i % 5; // keep shapes inside the card however many guides there are
   const y = 150 + seed * 18;
+  // Unique ids (prefixed) so they never collide with the logo's gradient ids
   return `<svg viewBox="0 0 380 475" preserveAspectRatio="none">
-    <defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="${color}" stop-opacity=".55"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
-    <path fill="url(#g${seed})" d="M0,${y} C90,${y - 70} 180,${y + 60} 380,${y - 30} L380,475 L0,475Z" style="transform-origin:50% 100%"/>
+    <defs><linearGradient id="guide-grad-${i}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${shade(color, 0.25)}"/><stop offset="1" stop-color="${shade(color, -0.35)}"/></linearGradient></defs>
+    <path fill="url(#guide-grad-${i})" d="M0,${y} C90,${y - 70} 180,${y + 60} 380,${y - 30} L380,475 L0,475Z" style="transform-origin:50% 100%"/>
     <circle cx="${280 - seed * 30}" cy="${80 + seed * 12}" r="${36 + seed * 6}" fill="${color}" opacity=".85"/>
   </svg>`;
 }
@@ -272,8 +290,12 @@ function initCoupons() {
     const btn = e.target.closest('.reveal-btn');
     if (!btn) return;
     const c = coupons[+btn.dataset.i];
-    if (c.type === 'code') openModal(c);
-    else { splash(e.clientX, e.clientY, storeById[c.store].color); toast(`Deal activated at ${storeById[c.store].name} ✦`); }
+    const s = storeById[c.store];
+    if (c.type === 'code') { openModal(c); return; }
+    splash(e.clientX, e.clientY, safeColor(s.color));
+    const link = safeUrl(c.url) || safeUrl(s.website);
+    if (link) { window.open(link, '_blank', 'noopener'); toast(`Opening ${s.name} — deal applied ✦`); }
+    else toast(`Deal activated at ${s.name} ✦`);
   });
 
   if (reduced) return;
@@ -291,9 +313,12 @@ function openModal(c) {
   const s = storeById[c.store];
   lastFocus = document.activeElement;
   $('.modal__logo').textContent = initials(s.name);
-  $('.modal__logo').style.background = s.color;
+  $('.modal__logo').style.background = safeColor(s.color);
   $('#modal-title').textContent = `${s.name}: ${c.title}`;
   $('.modal__code span').textContent = c.code;
+  const shop = $('.modal__shop'), link = safeUrl(c.url) || safeUrl(s.website);
+  shop.hidden = !link;
+  if (link) { shop.href = link; shop.textContent = `Shop at ${s.name} →`; }
   modal.hidden = false;
   lenis?.stop();
   gsap.fromTo('.modal__backdrop', { opacity: 0 }, { opacity: 1, duration: 0.3 });
@@ -345,8 +370,8 @@ function initSearch() {
     if (!q) { list.classList.remove('is-open'); return; }
     const hits = stores.filter((s) => s.name.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q)).slice(0, 6);
     list.innerHTML = hits.length
-      ? hits.map((s) => `<li><a href="#store-${s.id}" data-id="${s.id}"><span class="coupon__dot" style="--c:${s.color}"></span><b>${s.name}</b><small>${s.coupons}+ coupons</small></a></li>`).join('')
-      : `<li class="empty">No stores match “${input.value.replace(/[<>&"]/g, '')}” yet.</li>`;
+      ? hits.map((s) => `<li><a href="#store-${esc(s.id)}" data-id="${esc(s.id)}"><span class="coupon__dot" style="--c:${safeColor(s.color)}"></span><b>${esc(s.name)}</b><small>${s.coupons} coupon${s.coupons === 1 ? '' : 's'}</small></a></li>`).join('')
+      : `<li class="empty">No stores match “${esc(input.value)}” yet.</li>`;
     list.classList.add('is-open');
     gsap.from($$('li', list), { y: 10, opacity: 0, stagger: 0.03, duration: 0.3 });
   };
@@ -458,6 +483,12 @@ $('.newsletter').addEventListener('submit', (e) => {
 
 /* ---------------- Boot ---------------- */
 document.body.classList.add('is-loading');
+const content = await loadContent(); // Sanity, or sample data as a fallback (loader screen covers the wait)
+allStores = content.stores;
+storeById = Object.fromEntries(allStores.map((s) => [s.id, s]));
+stores = allStores.filter((s) => s.featured);
+({ coupons, guides, faqs } = content);
+document.documentElement.dataset.content = content.source;
 render();
 initScroll();
 initWaves($('.hero__waves'), { reduced });

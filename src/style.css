@@ -402,6 +402,11 @@ h1, h2, h3 { font-family: var(--display); line-height: 1; margin: 0; letter-spac
 .modal h3 { font-size: 1.6rem; line-height: 1.15; }
 .modal__code { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 24px 0 12px; padding: 8px 8px 8px 20px; border: 2px dashed var(--ink); border-radius: 16px; }
 .modal__code span { font: 800 1.4rem var(--display); letter-spacing: .08em; }
+.modal__shop { display: block; margin: 4px 0 12px; font-weight: 700; color: var(--blue); }
+.modal__shop:hover { text-decoration: underline; }
+.modal__shop[hidden] { display: none; }
+.store__logo img { width: 70%; height: 70%; object-fit: contain; }
+.empty-note { grid-column: 1 / -1; text-align: center; color: #5a6e7d; padding: 40px 0; }
 .modal__hint { margin: 0; color: #5a6e7d; font-size: .9rem; }
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 95; translate: -50% 140%; padding: .9em 1.4em; border-radius: 999px; background: var(--ink); color: var(--amber); font-weight: 700; border: 1px solid var(--amber); transition: translate .45s var(--ease); }
 .toast.is-show { translate: -50% 0; }

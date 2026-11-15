@@ -23,6 +23,29 @@ npm run preview  # serve the production build
 | `src/waves.js` | Interactive hero wave + bubble canvas |
 | `src/data.js` | Sample stores, coupons, guides, FAQ (fictional — swap for a real API/CMS) |
 
+## Editing content (staff)
+
+Coupons, stores, guides and FAQs are managed in **Mizu Deals Studio**: https://mizudeals.sanity.studio
+
+- Sign in, edit, press **Publish** — the website shows the change within seconds (no redeploy).
+- Coupons with an **Expires** date disappear from the site automatically after that time.
+- Untick **Show in “Trending right now”** to hide a coupon without deleting it.
+- Invite staff at https://www.sanity.io/manage/project/flsjgqi9 → **Members** (Editor role is enough).
+
+How it works: `src/cms.js` fetches published content from Sanity's CDN (project `flsjgqi9`, dataset `production`, public read-only).
+If Sanity can't be reached, the site falls back to the sample content in `src/data.js`.
+
+### Studio development
+
+```bash
+cd studio
+npm install
+npm run dev      # local Studio at http://localhost:3333
+npm run deploy   # publish schema/Studio changes to mizudeals.sanity.studio
+```
+
+Schemas live in `studio/schemaTypes/`. On Windows PowerShell, use `npx.cmd` instead of `npx` if scripts are blocked.
+
 ## Deploy
 
 Every push and pull request to `main` runs the build as a check (`.github/workflows/deploy.yml`).
