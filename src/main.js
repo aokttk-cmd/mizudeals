@@ -136,10 +136,12 @@ function intro() {
   const tl = gsap.timeline({ onComplete: () => document.body.classList.remove('is-loading') });
   if (reduced) { gsap.set('.loader', { display: 'none' }); return tl; }
   tl.from('.loader__drop', { y: -innerHeight / 2, duration: 0.6, ease: 'power2.in' })
-    .to('.loader__drop', { scale: 160, duration: 0.9, ease: 'expo.inOut' })
-    .to('.loader', { backgroundColor: '#0866e8', duration: 0.01 })
+    // The falling blue drop splashes into deep night water, so the logo's blue + rainbow pop
+    .to('.loader__drop', { scale: 160, backgroundColor: '#0b1a52', duration: 0.9, ease: 'expo.inOut' })
+    .add(() => $('.loader').classList.add('is-night'))
     .set('.loader__drop', { opacity: 0 })
     .to('.loader__mark', { opacity: 1, duration: 0.2 }, '-=0.2')
+    .from('.loader__glow', { scale: 0.3, opacity: 0, duration: 1, ease: 'expo.out' }, '<')
     .from('.loader__mark .mark-drop', { scale: 0, svgOrigin: '110 110', duration: 0.6, ease: 'back.out(2)' }, '<')
     .from('.loader__mark .wing-l', { rotate: 70, scale: 0.2, opacity: 0, svgOrigin: '100 110', duration: 0.8, ease: 'expo.out' }, '-=0.35')
     .from('.loader__mark .wing-r', { rotate: -70, scale: 0.2, opacity: 0, svgOrigin: '120 110', duration: 0.8, ease: 'expo.out' }, '<')

@@ -65,8 +65,18 @@ h1, h2, h3 { font-family: var(--display); line-height: 1; margin: 0; letter-spac
   position: absolute; width: 18px; height: 18px; border-radius: 50%;
   background: var(--blue);
 }
-.loader__mark { position: relative; width: clamp(160px, 30vw, 260px); opacity: 0; }
-.loader__mark svg { width: 100%; height: auto; }
+.loader.is-night {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(43, 140, 255, .18) 0%, transparent 45%),
+    radial-gradient(120% 90% at 50% 50%, #0b1a52 0%, #050b2e 70%);
+}
+.loader__mark { position: relative; width: clamp(280px, 60vw, 560px); opacity: 0; }
+.loader__mark svg { position: relative; width: 100%; height: auto; filter: drop-shadow(0 18px 40px rgba(8, 102, 232, .45)); }
+.loader__glow {
+  position: absolute; inset: 0; margin: auto; width: 70%; aspect-ratio: 1; /* centered without transforms (GSAP owns those) */
+  border-radius: 50%; background: radial-gradient(circle, rgba(46, 197, 245, .35), rgba(138, 43, 226, .15) 45%, transparent 70%);
+  filter: blur(10px);
+}
 
 /* ---------- Cursor ---------- */
 .cursor {
