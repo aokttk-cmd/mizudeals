@@ -54,7 +54,9 @@ function render() {
         <span class="reveal-btn__face">${isCode ? 'GET CODE' : 'GET DEAL'}</span>
       </button>
     </article>`;
-  }).join('') : '<p class="empty-note">New deals are on the way — check back soon.</p>';
+  }).join('') : (document.documentElement.dataset.content === 'offline'
+    ? '<p class="empty-note">We couldn’t load today’s deals. Please check your connection and refresh the page.</p>'
+    : '<p class="empty-note">New deals are on the way — check back soon.</p>');
 
   $('.guides__track').innerHTML = guides.map((g, i) => `
     <a href="#guides" class="guide" style="--h:${safeColor(g.hue)}">
@@ -483,7 +485,7 @@ $('.newsletter').addEventListener('submit', (e) => {
 
 /* ---------------- Boot ---------------- */
 document.body.classList.add('is-loading');
-const content = await loadContent(); // Sanity, or sample data as a fallback (loader screen covers the wait)
+const content = await loadContent(); // Sanity, or the last saved copy (loader screen covers the wait)
 allStores = content.stores;
 storeById = Object.fromEntries(allStores.map((s) => [s.id, s]));
 stores = allStores.filter((s) => s.featured);

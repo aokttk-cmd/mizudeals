@@ -1,5 +1,5 @@
 // Loads site content from Sanity (edited by staff in Mizu Deals Studio).
-// Falls back to the bundled sample data if Sanity isn't configured or can't be reached.
+// Sample data is only used when Sanity isn't configured (e.g. a fresh local checkout).
 import * as sample from './data.js';
 
 // Public settings — the project ID is not a secret (the dataset is read-only to the public).
@@ -78,7 +78,7 @@ const writeCache = (data) => { try { localStorage.setItem(CACHE_KEY, JSON.string
 
 /**
  * Order of preference: Sanity CDN → Sanity API (uncached) → last good copy saved in this
- * browser → bundled sample data. `source` and `errors` say which one was used and why.
+ * browser → empty "couldn't load" state (sample data only when Sanity isn't configured). `source` and `errors` say which one was used and why.
  */
 export async function loadContent({ timeoutMs = 6000 } = {}) {
   const { projectId } = SANITY;
@@ -97,5 +97,7 @@ export async function loadContent({ timeoutMs = 6000 } = {}) {
   console.warn('[Mizu Deals] Could not load from Sanity:', errors.join(' | '));
   const cached = readCache();
   if (cached?.data) return { source: 'browser-cache', cachedAt: cached.at, errors, ...cached.data };
-  return { errors, ...fromSample() };
+  // Never show the made-up sample coupons on the live site: they'd look like real deals
+  // that staff already removed. Show an empty "couldn't load" state instead.
+  return { source: 'offline', errors, stores: [], coupons: [], guides: [], faqs: sample.faqs };
 }
