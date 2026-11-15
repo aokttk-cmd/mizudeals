@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  # Every 10 minutes, refresh the content.json copy of Sanity (for visitors who can't reach
+  # sanity.io). It only redeploys when staff actually changed something.
+  schedule:
+    - cron: '*/10 * * * *'
 
 permissions:
   contents: read
@@ -14,11 +18,14 @@ permissions:
 
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a running deploy (a scheduled check could otherwise cancel a code deploy)
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.publish.outputs.go }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -27,8 +34,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Snapshot Sanity content into dist/content.json
+        id: snapshot
+        run: node scripts/snapshot.mjs
+      - name: Decide whether to deploy
+        id: publish
+        # Pushes always deploy; scheduled runs only when the content changed.
+        run: echo "go=${{ github.event_name != 'pull_request' && vars.DEPLOY_PAGES == 'true' && (github.event_name != 'schedule' || steps.snapshot.outputs.changed == 'true') }}" >> "$GITHUB_OUTPUT"
       - name: Upload Pages artifact
-        if: github.event_name != 'pull_request' && vars.DEPLOY_PAGES == 'true'
+        if: steps.publish.outputs.go == 'true'
         uses: actions/upload-pages-artifact@v5
         with:
           path: dist
@@ -37,7 +51,7 @@ jobs:
     # Only deploy from main; pull requests just get a build check.
     # Private repos need a paid plan for Pages: set the repo variable
     # DEPLOY_PAGES=true (Settings → Secrets and variables → Actions → Variables) to enable.
-    if: github.event_name != 'pull_request' && vars.DEPLOY_PAGES == 'true'
+    if: needs.build.outputs.publish == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:

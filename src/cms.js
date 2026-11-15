@@ -55,7 +55,7 @@ function normalise(result) {
   };
 }
 
-async function fetchFrom(host, timeoutMs) {
+export async function fetchFrom(host, timeoutMs) {
   const { projectId, dataset, apiVersion } = SANITY;
   const url = `https://${projectId}.${host}/${apiVersion}/data/query/${dataset}` +
     `?query=${encodeURIComponent(QUERY)}&perspective=published`;
@@ -76,13 +76,28 @@ async function fetchFrom(host, timeoutMs) {
 const readCache = () => { try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; } };
 const writeCache = (data) => { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data })); } catch { /* storage blocked */ } };
 
+// Copy of the Sanity content published with the site (see scripts/snapshot.mjs). It comes
+// from GitHub Pages itself, so it works even when a visitor's browser can't reach sanity.io.
+async function fetchSnapshot() {
+  const res = await fetch(`./content.json?t=${Date.now()}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`content.json responded ${res.status}`);
+  const snap = await res.json();
+  if (!snap?.data?.stores?.length) throw new Error('content.json is empty');
+  return snap;
+}
+
 /**
- * Order of preference: Sanity CDN → Sanity API (uncached) → last good copy saved in this
- * browser → empty "couldn't load" state (sample data only when Sanity isn't configured). `source` and `errors` say which one was used and why.
+ * Order of preference: Sanity CDN → Sanity API (uncached) → site snapshot (content.json) →
+ * last good copy saved in this browser → empty "couldn't load" state.
+ * Sample data is only used when Sanity isn't configured. `source` and `errors` say which one was used and why.
  */
-export async function loadContent({ timeoutMs = 6000 } = {}) {
+export async function loadContent({ timeoutMs = 5000 } = {}) {
   const { projectId } = SANITY;
   if (!projectId || projectId === 'REPLACE_ME') return { source: 'sample', errors: ['Sanity not configured'], ...fromSample() };
+
+  // Start loading the snapshot straight away so a blocked Sanity doesn't add extra waiting.
+  const snapshot = fetchSnapshot();
+  snapshot.catch(() => {});
 
   const errors = [];
   for (const host of ['apicdn.sanity.io', 'api.sanity.io']) {
@@ -95,6 +110,12 @@ export async function loadContent({ timeoutMs = 6000 } = {}) {
     }
   }
   console.warn('[Mizu Deals] Could not load from Sanity:', errors.join(' | '));
+  try {
+    const snap = await snapshot;
+    return { source: 'site-snapshot', cachedAt: snap.at, errors, ...snap.data };
+  } catch (err) {
+    errors.push(err.message);
+  }
   const cached = readCache();
   if (cached?.data) return { source: 'browser-cache', cachedAt: cached.at, errors, ...cached.data };
   // Never show the made-up sample coupons on the live site: they'd look like real deals
