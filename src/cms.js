@@ -42,31 +42,60 @@ function fromSample() {
   };
 }
 
-export async function loadContent({ timeoutMs = 5000 } = {}) {
-  const { projectId, dataset, apiVersion } = SANITY;
-  if (!projectId || projectId === 'REPLACE_ME') return fromSample();
+const CACHE_KEY = 'mizudeals:content:v1';
 
-  const url = `https://${projectId}.apicdn.sanity.io/${apiVersion}/data/query/${dataset}` +
+function normalise(result) {
+  if (!result?.stores?.length) throw new Error('No stores published yet');
+  const ids = new Set(result.stores.map((s) => s.id));
+  return {
+    stores: result.stores.map((s) => ({ ...s, color: s.color || '#2b8cff' })),
+    coupons: result.coupons.filter((c) => ids.has(c.store) && (c.type !== 'code' || c.code)),
+    guides: result.guides.map((g) => ({ ...g, hue: g.hue || '#8a2be2', date: fmtDate(g.date) })),
+    faqs: result.faqs,
+  };
+}
+
+async function fetchFrom(host, timeoutMs) {
+  const { projectId, dataset, apiVersion } = SANITY;
+  const url = `https://${projectId}.${host}/${apiVersion}/data/query/${dataset}` +
     `?query=${encodeURIComponent(QUERY)}&perspective=published`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: ctrl.signal });
-    if (!res.ok) throw new Error(`Sanity responded ${res.status}`);
+    const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+    if (!res.ok) throw new Error(`${host} responded ${res.status}`);
     const { result } = await res.json();
-    if (!result?.stores?.length) throw new Error('No stores published yet');
-    const ids = new Set(result.stores.map((s) => s.id));
-    return {
-      source: 'sanity',
-      stores: result.stores.map((s) => ({ ...s, color: s.color || '#2b8cff' })),
-      coupons: result.coupons.filter((c) => ids.has(c.store) && (c.type !== 'code' || c.code)),
-      guides: result.guides.map((g) => ({ ...g, hue: g.hue || '#8a2be2', date: fmtDate(g.date) })),
-      faqs: result.faqs,
-    };
+    return normalise(result);
   } catch (err) {
-    console.warn('[Mizu Deals] Using sample content:', err.message);
-    return fromSample();
+    throw new Error(`${host}: ${err.name === 'AbortError' ? `timed out after ${timeoutMs / 1000}s` : err.message}`);
   } finally {
     clearTimeout(timer);
   }
+}
+
+const readCache = () => { try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; } };
+const writeCache = (data) => { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data })); } catch { /* storage blocked */ } };
+
+/**
+ * Order of preference: Sanity CDN → Sanity API (uncached) → last good copy saved in this
+ * browser → bundled sample data. `source` and `errors` say which one was used and why.
+ */
+export async function loadContent({ timeoutMs = 6000 } = {}) {
+  const { projectId } = SANITY;
+  if (!projectId || projectId === 'REPLACE_ME') return { source: 'sample', errors: ['Sanity not configured'], ...fromSample() };
+
+  const errors = [];
+  for (const host of ['apicdn.sanity.io', 'api.sanity.io']) {
+    try {
+      const data = await fetchFrom(host, timeoutMs);
+      writeCache(data);
+      return { source: host.startsWith('apicdn') ? 'sanity-cdn' : 'sanity-api', errors, ...data };
+    } catch (err) {
+      errors.push(err.message);
+    }
+  }
+  console.warn('[Mizu Deals] Could not load from Sanity:', errors.join(' | '));
+  const cached = readCache();
+  if (cached?.data) return { source: 'browser-cache', cachedAt: cached.at, errors, ...cached.data };
+  return { errors, ...fromSample() };
 }

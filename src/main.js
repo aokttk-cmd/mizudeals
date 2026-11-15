@@ -489,6 +489,18 @@ storeById = Object.fromEntries(allStores.map((s) => [s.id, s]));
 stores = allStores.filter((s) => s.featured);
 ({ coupons, guides, faqs } = content);
 document.documentElement.dataset.content = content.source;
+// Add ?debug to the URL to see where content came from (handy for troubleshooting)
+if (new URLSearchParams(location.search).has('debug')) {
+  const b = document.createElement('div');
+  b.className = 'debug-badge';
+  b.textContent = [
+    `Content source: ${content.source}`,
+    content.cachedAt ? `Saved copy from: ${new Date(content.cachedAt).toLocaleString()}` : '',
+    `Coupons: ${content.coupons.length} · Stores: ${content.stores.length}`,
+    ...(content.errors || []).map((e) => `Error: ${e}`),
+  ].filter(Boolean).join('\n');
+  document.body.appendChild(b);
+}
 render();
 initScroll();
 initWaves($('.hero__waves'), { reduced });
