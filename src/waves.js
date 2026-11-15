@@ -2,10 +2,10 @@
 export function initWaves(canvas, { reduced = false } = {}) {
   const ctx = canvas.getContext('2d');
   const layers = [
-    { amp: 26, len: 0.0042, speed: 0.6, y: 0.70, color: ['rgba(94,242,225,0.10)', 'rgba(94,242,225,0.02)'] },
-    { amp: 34, len: 0.0030, speed: -0.45, y: 0.77, color: ['rgba(76,201,240,0.14)', 'rgba(15,53,80,0.2)'] },
-    { amp: 22, len: 0.0055, speed: 0.8, y: 0.84, color: ['rgba(94,242,225,0.18)', 'rgba(4,18,31,0.6)'] },
-    { amp: 18, len: 0.0068, speed: -0.9, y: 0.91, color: ['rgba(10,34,54,0.95)', 'rgba(4,18,31,1)'] },
+    { amp: 26, len: 0.0042, speed: 0.6, y: 0.68, color: ['rgba(138,43,226,0.22)', 'rgba(138,43,226,0.02)'] },
+    { amp: 34, len: 0.0030, speed: -0.45, y: 0.75, color: ['rgba(46,197,245,0.22)', 'rgba(8,102,232,0.15)'] },
+    { amp: 22, len: 0.0055, speed: 0.8, y: 0.83, color: ['rgba(8,102,232,0.55)', 'rgba(6,56,184,0.6)'] },
+    { amp: 18, len: 0.0068, speed: -0.9, y: 0.91, color: ['rgba(11,26,82,0.98)', 'rgba(5,11,46,1)'] },
   ];
   let w = 0, h = 0, dpr = 1, t = 0, raf = 0, running = true;
   const mouse = { x: -9999, y: 0, tx: -9999, power: 0 };
@@ -42,7 +42,7 @@ export function initWaves(canvas, { reduced = false } = {}) {
       if (b.y < -10) Object.assign(b, newBubble(false));
       ctx.beginPath();
       ctx.arc(bx, b.y, b.r, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(94,242,225,${0.15 + b.r / 20})`;
+      ctx.strokeStyle = `rgba(46,197,245,${0.15 + b.r / 20})`;
       ctx.lineWidth = 1;
       ctx.stroke();
     }

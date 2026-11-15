@@ -1,17 +1,17 @@
 // Sample data — fictional stores and offers. Replace with a real API/CMS later.
 export const stores = [
-  { id: 'kumo', name: 'Kumo Audio', cat: 'Electronics', color: '#5ef2e1', coupons: 14 },
-  { id: 'northpeak', name: 'Northpeak', cat: 'Outdoor', color: '#ff6b4a', coupons: 9 },
-  { id: 'lumen', name: 'Lumen Skin', cat: 'Beauty', color: '#ffd166', coupons: 21 },
-  { id: 'pixelforge', name: 'Pixel Forge', cat: 'Electronics', color: '#8e7dff', coupons: 7 },
-  { id: 'tidewear', name: 'Tidewear', cat: 'Fashion', color: '#4cc9f0', coupons: 18 },
-  { id: 'hearth', name: 'Hearth & Co', cat: 'Home', color: '#f4978e', coupons: 11 },
-  { id: 'velo', name: 'Velo Cycles', cat: 'Outdoor', color: '#90e0ef', coupons: 6 },
-  { id: 'brewline', name: 'Brewline', cat: 'Food', color: '#e9c46a', coupons: 12 },
-  { id: 'orbit', name: 'Orbit Travel', cat: 'Travel', color: '#b8f2e6', coupons: 10 },
-  { id: 'saku', name: 'Saku Home', cat: 'Home', color: '#ffafcc', coupons: 15 },
-  { id: 'nova', name: 'Nova Fit', cat: 'Fitness', color: '#caffbf', coupons: 16 },
-  { id: 'petal', name: 'Petal Florals', cat: 'Gifts', color: '#ffc8dd', coupons: 8 },
+  { id: 'kumo', name: 'Kumo Audio', cat: 'Electronics', color: '#2ec5f5', coupons: 14 },
+  { id: 'northpeak', name: 'Northpeak', cat: 'Outdoor', color: '#ff7a00', coupons: 9 },
+  { id: 'lumen', name: 'Lumen Skin', cat: 'Beauty', color: '#ffc414', coupons: 21 },
+  { id: 'pixelforge', name: 'Pixel Forge', cat: 'Electronics', color: '#8a2be2', coupons: 7 },
+  { id: 'tidewear', name: 'Tidewear', cat: 'Fashion', color: '#2b8cff', coupons: 18 },
+  { id: 'hearth', name: 'Hearth & Co', cat: 'Home', color: '#ff5e3a', coupons: 11 },
+  { id: 'velo', name: 'Velo Cycles', cat: 'Outdoor', color: '#5fe3ff', coupons: 6 },
+  { id: 'brewline', name: 'Brewline', cat: 'Food', color: '#ffe600', coupons: 12 },
+  { id: 'orbit', name: 'Orbit Travel', cat: 'Travel', color: '#9bd92c', coupons: 10 },
+  { id: 'saku', name: 'Saku Home', cat: 'Home', color: '#e04de8', coupons: 15 },
+  { id: 'nova', name: 'Nova Fit', cat: 'Fitness', color: '#b5dc16', coupons: 16 },
+  { id: 'petal', name: 'Petal Florals', cat: 'Gifts', color: '#a64dff', coupons: 8 },
 ];
 
 export const coupons = [
@@ -28,11 +28,11 @@ export const coupons = [
 ];
 
 export const guides = [
-  { tag: 'Electronics', title: 'How to time your tech upgrades around sale cycles', date: 'Nov 12, 2026', hue: '#8e7dff' },
-  { tag: 'Home', title: 'The calm-home checklist: what to buy, what to skip', date: 'Nov 8, 2026', hue: '#f4978e' },
-  { tag: 'Travel', title: 'Stacking codes and cashback on your next trip', date: 'Nov 3, 2026', hue: '#4cc9f0' },
-  { tag: 'Beauty', title: 'Skincare value sets that are actually worth it', date: 'Oct 28, 2026', hue: '#ffd166' },
-  { tag: 'Fitness', title: 'Building a home gym for under $500', date: 'Oct 21, 2026', hue: '#caffbf' },
+  { tag: 'Electronics', title: 'How to time your tech upgrades around sale cycles', date: 'Nov 12, 2026', hue: '#8a2be2' },
+  { tag: 'Home', title: 'The calm-home checklist: what to buy, what to skip', date: 'Nov 8, 2026', hue: '#ff7a00' },
+  { tag: 'Travel', title: 'Stacking codes and cashback on your next trip', date: 'Nov 3, 2026', hue: '#2b8cff' },
+  { tag: 'Beauty', title: 'Skincare value sets that are actually worth it', date: 'Oct 28, 2026', hue: '#ffc414' },
+  { tag: 'Fitness', title: 'Building a home gym for under $500', date: 'Oct 21, 2026', hue: '#9bd92c' },
 ];
 
 export const faqs = [

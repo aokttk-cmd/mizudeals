@@ -137,13 +137,23 @@ function intro() {
   if (reduced) { gsap.set('.loader', { display: 'none' }); return tl; }
   tl.from('.loader__drop', { y: -innerHeight / 2, duration: 0.6, ease: 'power2.in' })
     .to('.loader__drop', { scale: 160, duration: 0.9, ease: 'expo.inOut' })
-    .to('.loader__kanji', { opacity: 1, scale: 1, duration: 0.4, color: '#04121f' }, '-=0.5')
-    .to('.loader', { yPercent: -100, duration: 0.9, ease: 'expo.inOut' }, '+=0.15')
+    .to('.loader', { backgroundColor: '#0866e8', duration: 0.01 })
+    .set('.loader__drop', { opacity: 0 })
+    .to('.loader__mark', { opacity: 1, duration: 0.2 }, '-=0.2')
+    .from('.loader__mark .mark-drop', { scale: 0, svgOrigin: '110 110', duration: 0.6, ease: 'back.out(2)' }, '<')
+    .from('.loader__mark .wing-l', { rotate: 70, scale: 0.2, opacity: 0, svgOrigin: '100 110', duration: 0.8, ease: 'expo.out' }, '-=0.35')
+    .from('.loader__mark .wing-r', { rotate: -70, scale: 0.2, opacity: 0, svgOrigin: '120 110', duration: 0.8, ease: 'expo.out' }, '<')
+    .to('.loader', { yPercent: -100, duration: 0.9, ease: 'expo.inOut' }, '+=0.25')
     .from(chars, { yPercent: 110, rotate: 8, duration: 1, stagger: 0.035, ease: 'expo.out' }, '-=0.45')
     .from('.hero .reveal-up', { y: 30, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out' }, '-=0.8')
     .from('.ticket, .bubble', { scale: 0, rotate: -40, duration: 1, stagger: 0.08, ease: 'back.out(2)' }, '-=0.9')
     .from('.nav', { y: -100, duration: 0.8, ease: 'expo.out' }, '-=0.9')
-    .set('.loader', { display: 'none' });
+    .set('.loader', { display: 'none' })
+    // Gentle idle wing-flap on the nav logo
+    .add(() => {
+      gsap.to('.logo .wing-l', { rotate: 6, svgOrigin: '100 110', duration: 1.6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      gsap.to('.logo .wing-r', { rotate: -6, svgOrigin: '120 110', duration: 1.6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    });
   return tl;
 }
 
@@ -297,7 +307,7 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) cl
 $('.modal__code .btn').addEventListener('click', async (e) => {
   const code = $('.modal__code span').textContent;
   try { await navigator.clipboard.writeText(code); } catch { /* clipboard blocked — still show feedback */ }
-  splash(e.clientX, e.clientY, '#5ef2e1');
+  splash(e.clientX, e.clientY, '#ffc414');
   toast(`Copied “${code}” — paste it at checkout`);
 });
 
@@ -356,7 +366,7 @@ function initSearch() {
     list.classList.remove('is-open');
     const card = $(`#store-${a.dataset.id}`);
     lenis ? lenis.scrollTo(card, { offset: -120 }) : card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    gsap.fromTo(card, { boxShadow: '0 0 0 0 rgba(94,242,225,.9)' }, { boxShadow: '0 0 0 18px rgba(94,242,225,0)', duration: 1.2, delay: 0.8, repeat: 1 });
+    gsap.fromTo(card, { boxShadow: '0 0 0 0 rgba(46,197,245,.9)' }, { boxShadow: '0 0 0 18px rgba(46,197,245,0)', duration: 1.2, delay: 0.8, repeat: 1 });
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('.search')) list.classList.remove('is-open'); });
   addEventListener('keydown', (e) => {
